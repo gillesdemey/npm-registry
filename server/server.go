@@ -7,8 +7,8 @@ import (
 )
 
 type NPMRegistry struct {
-	Router    *gin.Engine
-	Storage   storage.StorageEngine
+	Router  *gin.Engine
+	Storage storage.StorageEngine
 }
 
 func New(router *gin.Engine, storage storage.StorageEngine) *NPMRegistry {
@@ -29,12 +29,18 @@ func New(router *gin.Engine, storage storage.StorageEngine) *NPMRegistry {
 	// login
 	// TODO: logout
 	router.PUT("/-/user/:user", func(c *gin.Context) {
-		token, err := registry.Login("foo", "bar")
+		var json Login
 
-    c.JSON(http.StatusCreated, gin.H{
-      "error": err,
-      "token": token,
-    })
+		if err := c.BindJSON(&json); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "bad request"})
+		}
+
+		token, err := registry.Login(json.Username, json.Password)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
+		} else {
+			c.JSON(http.StatusCreated, gin.H{"token": token})
+		}
 	})
 
 	// Print the username config to standard output.

@@ -2,4 +2,5 @@
 engine = 'google'
 
 [storage.google]
+project = 'quiet-mechanic-140114'
 bucket = 'npm-registry'

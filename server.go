@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-  router := gin.Default()
+	router := gin.Default()
 	storage := storage.NewFSStorage()
 
 	server := server.New(router, storage)
