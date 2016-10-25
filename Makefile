@@ -1,5 +1,5 @@
 build:
-	go build -o npm-registry server/server.go
+	go build -o npm-registry server.go
 
 run:
 	bra run

@@ -1,0 +1,5 @@
+[storage]
+engine = 'google'
+
+[storage.google]
+bucket = 'npm-registry'
