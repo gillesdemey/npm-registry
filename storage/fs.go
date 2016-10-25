@@ -50,7 +50,6 @@ func (s *FSStorage) StoreUserToken(token string, username string) error {
 	}
 
 	tokensFile := filepath.Join(s.folder, "tokens.toml")
-	log.Printf("Writing to file %s", tokensFile)
 
 	if err := ioutil.WriteFile(tokensFile, entry.Bytes(), 0666); err != nil {
 		log.Fatal(err)
