@@ -17,7 +17,10 @@ func New(router *gin.Engine, storage storage.StorageEngine) *gin.Engine {
 	})
 
 	// Print the username config to standard output.
-	router.GET("/-/whoami", routes.Whoami)
+	router.GET("/-/whoami", func(c *gin.Context) {
+		c.Set("storage", storage)
+		routes.Whoami(c)
+	})
 
 	// dist-tags
 	router.GET("/-/package/:name/dist-tags", func(c *gin.Context) {

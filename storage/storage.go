@@ -8,6 +8,7 @@ type StorageEngine interface {
 	initialize() error
 	StoreTarball() error
 	RetrieveTarball() ([]byte, error)
-	RetrieveUser() (model.User, error)
+	RetrieveUser(token string) (model.User, error)
 	StoreUserToken(username string, token string) error
+	RetrieveUsernameFromToken(token string) (string, error)
 }

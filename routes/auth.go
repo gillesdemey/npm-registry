@@ -6,6 +6,8 @@ import (
   "github.com/gillesdemey/npm-registry/storage"
   "gopkg.in/gin-gonic/gin.v1"
   "net/http"
+  "log"
+  "regexp"
 )
 
 func Login(c *gin.Context) {
@@ -39,5 +41,18 @@ func Login(c *gin.Context) {
 
 // Return the username associated with the NPM token
 func Whoami(c *gin.Context) {
-  c.JSON(http.StatusOK, gin.H{"username": "foo"})
+  re := regexp.MustCompile("(?i)Bearer ")
+  authHeader := c.Request.Header.Get("Authorization")
+  token := re.ReplaceAllString(authHeader, "")
+  log.Printf("Whoami request for token '%s'", token)
+
+  storage := c.Value("storage").(storage.StorageEngine)
+  username, err := storage.RetrieveUsernameFromToken(token)
+
+  if err != nil {
+    c.Status(http.StatusUnauthorized)
+    return
+  }
+
+  c.JSON(http.StatusOK, gin.H{"username": username})
 }

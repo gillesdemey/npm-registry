@@ -5,7 +5,6 @@ import (
 	"github.com/BurntSushi/toml"
 	"github.com/gillesdemey/npm-registry/model"
 	"io/ioutil"
-	"log"
 	"path/filepath"
 	"time"
 )
@@ -33,7 +32,17 @@ func (s *FSStorage) RetrieveTarball() ([]byte, error) {
 	return nil, nil
 }
 
-func (s *FSStorage) RetrieveUser() (model.User, error) {
+func (s *FSStorage) RetrieveUsernameFromToken(token string) (string, error) {
+	tokenEntries := make(map[string]model.Token)
+	if _, err := toml.DecodeFile("tokens.toml", &tokenEntries); err != nil {
+    return "", err
+	}
+	tokenEntry := tokenEntries[token]
+
+	return tokenEntry.Username, nil
+}
+
+func (s *FSStorage) RetrieveUser(token string) (model.User, error) {
 	return model.User{}, nil
 }
 
@@ -46,13 +55,13 @@ func (s *FSStorage) StoreUserToken(token string, username string) error {
 
 	entry := new(bytes.Buffer)
 	if err := toml.NewEncoder(entry).Encode(tokenEntry); err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	tokensFile := filepath.Join(s.folder, "tokens.toml")
 
 	if err := ioutil.WriteFile(tokensFile, entry.Bytes(), 0666); err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	return nil

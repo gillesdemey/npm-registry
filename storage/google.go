@@ -29,7 +29,7 @@ func (s *GoogleStorage) RetrieveTarball() ([]byte, error) {
 	return nil, nil
 }
 
-func (s *GoogleStorage) RetrieveUser() (model.User, error) {
+func (s *GoogleStorage) RetrieveUser(token string) (model.User, error) {
 	return model.User{}, nil
 }
 
