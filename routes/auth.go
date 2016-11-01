@@ -36,3 +36,8 @@ func Login(c *gin.Context) {
 
   c.JSON(http.StatusCreated, gin.H{"token": token})
 }
+
+// Return the username associated with the NPM token
+func Whoami(c *gin.Context) {
+  c.JSON(http.StatusOK, gin.H{"username": "foo"})
+}

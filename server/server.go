@@ -4,7 +4,6 @@ import (
 	"github.com/gillesdemey/npm-registry/storage"
 	"github.com/gillesdemey/npm-registry/routes"
 	"gopkg.in/gin-gonic/gin.v1"
-	"net/http"
 )
 
 func New(router *gin.Engine, storage storage.StorageEngine) *gin.Engine {
@@ -21,9 +20,7 @@ func New(router *gin.Engine, storage storage.StorageEngine) *gin.Engine {
 	})
 
 	// Print the username config to standard output.
-	router.GET("/-/whoami", func(c *gin.Context) {
-		c.String(http.StatusOK, "gilles")
-	})
+	router.GET("/-/whoami", routes.Whoami)
 
 	// dist-tags
 	router.GET("/-/package/:name/dist-tags", func(c *gin.Context) {
