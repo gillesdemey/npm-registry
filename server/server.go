@@ -3,9 +3,9 @@ package server
 import (
 	"github.com/gillesdemey/npm-registry/routes"
 	"github.com/gillesdemey/npm-registry/storage"
-	"github.com/urfave/negroni"
 	"github.com/gorilla/pat"
 	"github.com/unrolled/render"
+	"github.com/urfave/negroni"
 	"golang.org/x/net/context"
 	"net/http"
 )
@@ -41,10 +41,10 @@ func New(router *pat.Router, storage storage.StorageEngine) *negroni.Negroni {
 	router.Get("/{pkg}", routes.GetPackage)
 
 	// tarballs
-	router.Get("/{pkg}/-/:filename", func (w http.ResponseWriter, r *http.Request) {})
+	router.Get("/{pkg}/-/:filename", func(w http.ResponseWriter, r *http.Request) {})
 
 	// publish
-	router.Put("/{pkg}", func (w http.ResponseWriter, r *http.Request) {})
+	router.Put("/{pkg}", func(w http.ResponseWriter, r *http.Request) {})
 
 	// root
 	router.Get("/", routes.Root)

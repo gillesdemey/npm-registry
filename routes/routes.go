@@ -3,8 +3,8 @@ package routes
 import (
 	"github.com/gillesdemey/npm-registry/storage"
 	"github.com/unrolled/render"
-	"net/http"
 	"golang.org/x/net/context"
+	"net/http"
 )
 
 func Root(w http.ResponseWriter, req *http.Request) {
@@ -19,9 +19,9 @@ func Ping(w http.ResponseWriter, req *http.Request) {
 }
 
 func StorageFromContext(c context.Context) storage.StorageEngine {
-  return c.Value("storage").(storage.StorageEngine)
+	return c.Value("storage").(storage.StorageEngine)
 }
 
 func RendererFromContext(c context.Context) *render.Render {
-  return c.Value("renderer").(*render.Render)
+	return c.Value("renderer").(*render.Render)
 }
