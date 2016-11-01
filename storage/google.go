@@ -1,5 +1,9 @@
 package storage
 
+import (
+	"github.com/gillesdemey/npm-registry/model"
+)
+
 type GoogleStorage struct {
 	StorageEngine
 	bucket string
@@ -25,8 +29,8 @@ func (s *GoogleStorage) RetrieveTarball() ([]byte, error) {
 	return nil, nil
 }
 
-func (s *GoogleStorage) RetrieveUser() (User, error) {
-	return User{}, nil
+func (s *GoogleStorage) RetrieveUser() (model.User, error) {
+	return model.User{}, nil
 }
 
 func (s *GoogleStorage) StoreUserToken(token string, username string) error {

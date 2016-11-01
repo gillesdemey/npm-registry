@@ -3,6 +3,7 @@ package storage
 import (
 	"bytes"
 	"github.com/BurntSushi/toml"
+	"github.com/gillesdemey/npm-registry/model"
 	"io/ioutil"
 	"log"
 	"path/filepath"
@@ -32,18 +33,17 @@ func (s *FSStorage) RetrieveTarball() ([]byte, error) {
 	return nil, nil
 }
 
-func (s *FSStorage) RetrieveUser() (User, error) {
-	return User{}, nil
+func (s *FSStorage) RetrieveUser() (model.User, error) {
+	return model.User{}, nil
 }
 
 func (s *FSStorage) StoreUserToken(token string, username string) error {
-	tokenEntry := &TokenEntry{
-		Token: TokenInfo{
-			Username:  username,
-			Token:     token,
-			Timestamp: time.Now(),
-		},
+	tokenEntry := make(map[string]model.Token, 1)
+	tokenEntry[token] = model.Token{
+		Username:  username,
+		Timestamp: time.Now(),
 	}
+
 	entry := new(bytes.Buffer)
 	if err := toml.NewEncoder(entry).Encode(tokenEntry); err != nil {
 		log.Fatal(err)
