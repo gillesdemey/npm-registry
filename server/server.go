@@ -2,45 +2,22 @@ package server
 
 import (
 	"github.com/gillesdemey/npm-registry/storage"
+	"github.com/gillesdemey/npm-registry/routes"
 	"gopkg.in/gin-gonic/gin.v1"
 	"net/http"
 )
 
-type NPMRegistry struct {
-	Router  *gin.Engine
-	Storage storage.StorageEngine
-}
-
-func New(router *gin.Engine, storage storage.StorageEngine) *NPMRegistry {
-	registry := &NPMRegistry{
-		Router:  router,
-		Storage: storage,
-	}
-
-	router.GET("/", func(c *gin.Context) {
-		c.String(http.StatusOK, "Running npm registry")
-	})
+func New(router *gin.Engine, storage storage.StorageEngine) *gin.Engine {
+	router.GET("/", routes.Root)
 
 	// Ping the configured or given npm registry and verify authentication.
-	router.GET("/-/ping", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{})
-	})
+	router.GET("/-/ping", routes.Ping)
 
 	// login
 	// TODO: logout
 	router.PUT("/-/user/:user", func(c *gin.Context) {
-		var json Login
-
-		if err := c.BindJSON(&json); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "bad request"})
-		}
-
-		token, err := registry.Login(json.Username, json.Password)
-		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
-		} else {
-			c.JSON(http.StatusCreated, gin.H{"token": token})
-		}
+		c.Set("storage", storage)
+		routes.Login(c)
 	})
 
 	// Print the username config to standard output.
@@ -70,9 +47,5 @@ func New(router *gin.Engine, storage storage.StorageEngine) *NPMRegistry {
 	// publish
 	// router.PUT("/:pkg", func (c *gin.Context) {})
 
-	return registry
-}
-
-func (r *NPMRegistry) Run(port string) {
-	r.Router.Run(port)
+	return router
 }

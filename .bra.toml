@@ -4,7 +4,7 @@ init_cmds = [
 	["./npm-registry"]
 ]
 
-watch_dirs = ["server", "storage"]
+watch_dirs = ["server", "storage", "routes", "model", "auth"]
 watch_exts = [".go"]
 ignore = [".git", "node_modules"]
 ignore_files = []
