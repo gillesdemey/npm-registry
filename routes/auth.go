@@ -10,6 +10,7 @@ import (
   "regexp"
 )
 
+// Create or verify a user named <username>
 func Login(c *gin.Context) {
   var login model.Login
   var err error
@@ -44,6 +45,7 @@ func Whoami(c *gin.Context) {
   re := regexp.MustCompile("(?i)Bearer ")
   authHeader := c.Request.Header.Get("Authorization")
   token := re.ReplaceAllString(authHeader, "")
+
   log.Printf("Whoami request for token '%s'", token)
 
   storage := c.Value("storage").(storage.StorageEngine)
