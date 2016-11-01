@@ -23,9 +23,7 @@ func New(router *gin.Engine, storage storage.StorageEngine) *gin.Engine {
 	})
 
 	// dist-tags
-	router.GET("/-/package/:name/dist-tags", func(c *gin.Context) {
-
-	})
+	router.GET("/-/package/:name/dist-tags", routes.DistTags)
 
 	router.PUT("/-/package/:name/dist-tags/:tag", func(c *gin.Context) {
 
