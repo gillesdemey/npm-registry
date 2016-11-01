@@ -3,44 +3,52 @@ package server
 import (
 	"github.com/gillesdemey/npm-registry/routes"
 	"github.com/gillesdemey/npm-registry/storage"
-	"gopkg.in/gin-gonic/gin.v1"
+	"github.com/urfave/negroni"
+	"github.com/gorilla/pat"
+	"github.com/unrolled/render"
+	"golang.org/x/net/context"
+	"net/http"
 )
 
-func New(router *gin.Engine, storage storage.StorageEngine) *gin.Engine {
-	router.GET("/", routes.Root)
-	router.GET("/-/ping", routes.Ping)
+func New(router *pat.Router, storage storage.StorageEngine) *negroni.Negroni {
+	n := negroni.Classic()
+	render := render.New()
+
+	// Attach storage and renderer on every request
+	n.Use(negroni.HandlerFunc(func(w http.ResponseWriter, req *http.Request, next http.HandlerFunc) {
+		var ctx = req.Context()
+		ctx = context.WithValue(ctx, "storage", storage)
+		ctx = context.WithValue(ctx, "renderer", render)
+		next(w, req.WithContext(ctx))
+	}))
+
+	router.Get("/-/ping", routes.Ping)
 
 	// TODO: logout
-	router.PUT("/-/user/:user", func(c *gin.Context) {
-		c.Set("storage", storage)
-		routes.Login(c)
-	})
+	router.Put("/-/user/{user}", routes.Login)
 
 	// Print the username config to standard output.
-	router.GET("/-/whoami", func(c *gin.Context) {
-		c.Set("storage", storage)
-		routes.Whoami(c)
-	})
+	router.Get("/-/whoami", routes.Whoami)
 
 	// dist-tags
-	router.GET("/-/package/:name/dist-tags", routes.DistTags)
+	router.Get("/-/package/{name}/dist-tags", routes.DistTags)
 
-	router.PUT("/-/package/:name/dist-tags/:tag", func(c *gin.Context) {
+	router.Put("/-/package/{name}/dist-tags/:tag", func(w http.ResponseWriter, r *http.Request) {})
 
-	})
-
-	router.DELETE("/-/package/:name/dist-tags/:tag", func(c *gin.Context) {
-
-	})
+	router.Delete("/-/package/{name}/dist-tags/:tag", func(w http.ResponseWriter, r *http.Request) {})
 
 	// packages
-	// router.GET("/:pkg", func(c *gin.Context) {})
+	router.Get("/{pkg}", routes.GetPackage)
 
 	// tarballs
-	// router.GET("/:pkg/-/:filename", func (c *gin.Context) {})
+	router.Get("/{pkg}/-/:filename", func (w http.ResponseWriter, r *http.Request) {})
 
 	// publish
-	// router.PUT("/:pkg", func (c *gin.Context) {})
+	router.Put("/{pkg}", func (w http.ResponseWriter, r *http.Request) {})
 
-	return router
+	// root
+	router.Get("/", routes.Root)
+
+	n.UseHandler(router)
+	return n
 }

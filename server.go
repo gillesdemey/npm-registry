@@ -3,13 +3,14 @@ package main
 import (
 	"github.com/gillesdemey/npm-registry/server"
 	"github.com/gillesdemey/npm-registry/storage"
-	"gopkg.in/gin-gonic/gin.v1"
+	"github.com/gorilla/pat"
+	"net/http"
 )
 
 func main() {
-	router := gin.Default()
+	router := pat.New()
 	storage := storage.NewFSStorage()
 
 	server := server.New(router, storage)
-	server.Run(":8080")
+	http.ListenAndServe(":8080", server)
 }

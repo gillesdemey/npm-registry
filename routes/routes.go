@@ -1,15 +1,27 @@
 package routes
 
 import (
-	"gopkg.in/gin-gonic/gin.v1"
+	"github.com/gillesdemey/npm-registry/storage"
+	"github.com/unrolled/render"
 	"net/http"
+	"golang.org/x/net/context"
 )
 
-func Root(c *gin.Context) {
-	c.String(http.StatusOK, "Running npm registry")
+func Root(w http.ResponseWriter, req *http.Request) {
+	render := RendererFromContext(req.Context())
+	render.Text(w, http.StatusOK, "Running npm registry")
 }
 
 // Ping the configured or given npm registry and verify authentication.
-func Ping(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{})
+func Ping(w http.ResponseWriter, req *http.Request) {
+	render := RendererFromContext(req.Context())
+	render.JSON(w, http.StatusOK, map[string]string{})
+}
+
+func StorageFromContext(c context.Context) storage.StorageEngine {
+  return c.Value("storage").(storage.StorageEngine)
+}
+
+func RendererFromContext(c context.Context) *render.Render {
+  return c.Value("renderer").(*render.Render)
 }
