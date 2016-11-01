@@ -1,8 +1,8 @@
 package server
 
 import (
-	"github.com/gillesdemey/npm-registry/storage"
 	"github.com/gillesdemey/npm-registry/routes"
+	"github.com/gillesdemey/npm-registry/storage"
 	"gopkg.in/gin-gonic/gin.v1"
 )
 

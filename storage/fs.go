@@ -35,7 +35,7 @@ func (s *FSStorage) RetrieveTarball() ([]byte, error) {
 func (s *FSStorage) RetrieveUsernameFromToken(token string) (string, error) {
 	tokenEntries := make(map[string]model.Token)
 	if _, err := toml.DecodeFile("tokens.toml", &tokenEntries); err != nil {
-    return "", err
+		return "", err
 	}
 	tokenEntry := tokenEntries[token]
 
