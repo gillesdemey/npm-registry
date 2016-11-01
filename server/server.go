@@ -8,11 +8,8 @@ import (
 
 func New(router *gin.Engine, storage storage.StorageEngine) *gin.Engine {
 	router.GET("/", routes.Root)
-
-	// Ping the configured or given npm registry and verify authentication.
 	router.GET("/-/ping", routes.Ping)
 
-	// login
 	// TODO: logout
 	router.PUT("/-/user/:user", func(c *gin.Context) {
 		c.Set("storage", storage)
