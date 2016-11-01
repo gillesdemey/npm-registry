@@ -4,6 +4,4 @@ build:
 run:
 	bra run
 
-default: build
-
 .PHONY: run build
