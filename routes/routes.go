@@ -18,8 +18,8 @@ func Ping(w http.ResponseWriter, req *http.Request) {
 	render.JSON(w, http.StatusOK, map[string]string{})
 }
 
-func StorageFromContext(c context.Context) storage.StorageEngine {
-	return c.Value("storage").(storage.StorageEngine)
+func StorageFromContext(c context.Context) storage.Engine {
+	return c.Value("storage").(storage.Engine)
 }
 
 func RendererFromContext(c context.Context) *render.Render {

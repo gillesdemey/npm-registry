@@ -1,16 +1,17 @@
 package server
 
 import (
+	"net/http"
+
 	"github.com/gillesdemey/npm-registry/routes"
 	"github.com/gillesdemey/npm-registry/storage"
 	"github.com/gorilla/pat"
 	"github.com/unrolled/render"
 	"github.com/urfave/negroni"
 	"golang.org/x/net/context"
-	"net/http"
 )
 
-func New(router *pat.Router, storage storage.StorageEngine) *negroni.Negroni {
+func New(router *pat.Router, storage storage.Engine) *negroni.Negroni {
 	n := negroni.Classic()
 	render := render.New()
 

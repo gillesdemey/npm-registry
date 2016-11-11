@@ -2,11 +2,12 @@ package routes
 
 import (
 	"encoding/json"
-	"github.com/gillesdemey/npm-registry/auth"
-	"github.com/gillesdemey/npm-registry/model"
 	"log"
 	"net/http"
 	"regexp"
+
+	"github.com/gillesdemey/npm-registry/auth"
+	"github.com/gillesdemey/npm-registry/model"
 )
 
 // Create or verify a user named <username>

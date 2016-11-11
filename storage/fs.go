@@ -3,17 +3,18 @@ package storage
 import (
 	"bytes"
 	"fmt"
-	"github.com/BurntSushi/toml"
-	"github.com/gillesdemey/npm-registry/model"
 	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/BurntSushi/toml"
+	"github.com/gillesdemey/npm-registry/model"
 )
 
 type FSStorage struct {
-	StorageEngine
+	Engine
 	folder string
 }
 

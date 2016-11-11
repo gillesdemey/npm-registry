@@ -5,7 +5,7 @@ import (
 )
 
 type GoogleStorage struct {
-	StorageEngine
+	Engine
 	bucket string
 }
 

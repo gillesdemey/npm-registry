@@ -2,8 +2,9 @@ package auth
 
 import (
 	"fmt"
-	"github.com/satori/go.uuid"
 	"log"
+
+	"github.com/satori/go.uuid"
 )
 
 func Login(username string, password string) (string, error) {

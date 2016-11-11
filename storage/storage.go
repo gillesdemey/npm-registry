@@ -1,11 +1,12 @@
 package storage
 
 import (
-	"github.com/gillesdemey/npm-registry/model"
 	"io"
+
+	"github.com/gillesdemey/npm-registry/model"
 )
 
-type StorageEngine interface {
+type Engine interface {
 	initialize() error
 	StoreTarball() error
 	RetrieveTarball() ([]byte, error)

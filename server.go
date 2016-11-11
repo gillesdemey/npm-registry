@@ -1,10 +1,11 @@
 package main
 
 import (
+	"net/http"
+
 	"github.com/gillesdemey/npm-registry/server"
 	"github.com/gillesdemey/npm-registry/storage"
 	"github.com/gorilla/pat"
-	"net/http"
 )
 
 func main() {
