@@ -2,9 +2,12 @@ package storage
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/BurntSushi/toml"
 	"github.com/gillesdemey/npm-registry/model"
+	"io"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"time"
 )
@@ -63,6 +66,20 @@ func (s *FSStorage) StoreUserToken(token string, username string) error {
 	if err := ioutil.WriteFile(tokensFile, entry.Bytes(), 0666); err != nil {
 		return err
 	}
+
+	return nil
+}
+
+func (s *FSStorage) RetrieveMetadata(pkg string, writer io.Writer) error {
+	metaFileName := fmt.Sprintf("packages/meta/%s.json", pkg)
+	metaFileLocation := filepath.Join(s.folder, metaFileName)
+
+	metaFile, err := os.Open(metaFileLocation)
+	if err != nil {
+		return err
+	}
+	defer metaFile.Close()
+	io.Copy(writer, metaFile)
 
 	return nil
 }

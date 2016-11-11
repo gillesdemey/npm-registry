@@ -38,7 +38,7 @@ func New(router *pat.Router, storage storage.StorageEngine) *negroni.Negroni {
 	router.Delete("/-/package/{name}/dist-tags/:tag", func(w http.ResponseWriter, r *http.Request) {})
 
 	// packages
-	router.Get("/{pkg}", routes.GetPackage)
+	router.Get("/{pkg}", routes.GetPackageMetadata)
 
 	// tarballs
 	router.Get("/{pkg}/-/:filename", func(w http.ResponseWriter, r *http.Request) {})
