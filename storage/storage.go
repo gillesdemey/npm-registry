@@ -2,17 +2,27 @@ package storage
 
 import (
 	"io"
-
-	"github.com/gillesdemey/npm-registry/model"
 )
 
-type Engine interface {
-	initialize() error
+type TarballStoreRetriever interface {
 	StoreTarball() error
-	RetrieveTarball() ([]byte, error)
-	StoreMetadata(pkg string) error
+	RetrieveTarball(pkg string, writer io.Writer) error
+}
+
+type MetaDataStoreRetriever interface {
+	StoreMetadata(pkg string, data io.Reader) error
 	RetrieveMetadata(pkg string, writer io.Writer) error
-	RetrieveUser(token string) (model.User, error)
-	StoreUserToken(username string, token string) error
-	RetrieveUsernameFromToken(token string) (string, error)
+}
+
+type UserStoreRetriever interface {
+	StoreUser(pkg string) error
+	StoreUserToken(token, username string) error
+	RetrieveUser(token string, writer io.Writer) error
+}
+
+type Engine interface {
+	TarballStoreRetriever
+	MetaDataStoreRetriever
+	UserStoreRetriever
+	RetrieveUsernameFromToken(token string) (string, error) // Do we realy need this?
 }

@@ -1,4 +1,4 @@
-package storage
+package storageengines
 
 import (
 	"bytes"
@@ -14,12 +14,11 @@ import (
 )
 
 type FSStorage struct {
-	Engine
 	folder string
 }
 
 func NewFSStorage() *FSStorage {
-	engine := &FSStorage{}
+	engine := new(FSStorage)
 	engine.initialize()
 	return engine
 }
@@ -32,8 +31,8 @@ func (s *FSStorage) StoreTarball() error {
 	return nil
 }
 
-func (s *FSStorage) RetrieveTarball() ([]byte, error) {
-	return nil, nil
+func (s *FSStorage) RetrieveTarball(string, io.Writer) error {
+	return nil
 }
 
 func (s *FSStorage) RetrieveUsernameFromToken(token string) (string, error) {
@@ -46,8 +45,12 @@ func (s *FSStorage) RetrieveUsernameFromToken(token string) (string, error) {
 	return tokenEntry.Username, nil
 }
 
-func (s *FSStorage) RetrieveUser(token string) (model.User, error) {
-	return model.User{}, nil
+func (s *FSStorage) StoreUser(pkg string) error {
+	return nil
+}
+
+func (s *FSStorage) RetrieveUser(string, io.Writer) error {
+	return nil
 }
 
 func (s *FSStorage) StoreUserToken(token string, username string) error {
@@ -81,6 +84,20 @@ func (s *FSStorage) RetrieveMetadata(pkg string, writer io.Writer) error {
 	}
 	defer metaFile.Close()
 	io.Copy(writer, metaFile)
+
+	return nil
+}
+
+func (s *FSStorage) StoreMetadata(pkg string, data io.Reader) error {
+	metaFileName := fmt.Sprintf("packages/meta/%s.json", pkg)
+	metaFileLocation := filepath.Join(s.folder, metaFileName)
+
+	metaFile, err := os.Create(metaFileLocation)
+	if err != nil {
+		return err
+	}
+	defer metaFile.Close()
+	io.Copy(metaFile, data)
 
 	return nil
 }

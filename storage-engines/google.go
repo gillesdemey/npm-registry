@@ -1,16 +1,15 @@
-package storage
+package storageengines
 
 import (
 	"github.com/gillesdemey/npm-registry/model"
 )
 
 type GoogleStorage struct {
-	Engine
 	bucket string
 }
 
 func NewGoogleStorage() *GoogleStorage {
-	engine := &GoogleStorage{}
+	engine := new(GoogleStorage)
 	engine.initialize()
 	return engine
 }

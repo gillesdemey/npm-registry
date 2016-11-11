@@ -40,13 +40,14 @@ func GetPackageMetadata(w http.ResponseWriter, req *http.Request) {
 	if resp.StatusCode == http.StatusNotModified {
 		return
 	}
-	_, err = io.Copy(w, resp.Body)
+
+	tee := io.TeeReader(resp.Body, w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	updateMetaStorage(pkg, resp.Body)
+	updateMetaStorage(storage, pkg, tee)
 }
 
 func tryUpstream(pkg string) (*http.Response, error) {
@@ -82,6 +83,14 @@ func tryMetaStorage(s storage.Engine, pkg string, writer io.Writer) error {
 	return nil
 }
 
-func updateMetaStorage(pkg string, data io.Reader) {
+func updateMetaStorage(s storage.Engine, pkg string, data io.Reader) error {
+	log.Printf("Updating %s in meta storage", pkg)
 
+	err := s.StoreMetadata(pkg, data)
+	if err != nil {
+		log.Printf("Failed to update %s in meta storage: %s", pkg, err)
+		return err
+	}
+
+	return nil
 }

@@ -4,13 +4,13 @@ import (
 	"net/http"
 
 	"github.com/gillesdemey/npm-registry/server"
-	"github.com/gillesdemey/npm-registry/storage"
+	"github.com/gillesdemey/npm-registry/storage-engines"
 	"github.com/gorilla/pat"
 )
 
 func main() {
 	router := pat.New()
-	storage := storage.NewFSStorage()
+	storage := storageengines.NewFSStorage()
 
 	server := server.New(router, storage)
 	http.ListenAndServe(":8080", server)
