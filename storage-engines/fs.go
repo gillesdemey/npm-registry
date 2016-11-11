@@ -75,7 +75,7 @@ func (s *FSStorage) StoreUserToken(token string, username string) error {
 }
 
 func (s *FSStorage) RetrieveMetadata(pkg string, writer io.Writer) error {
-	metaFileName := fmt.Sprintf("packages/meta/%s.json", pkg)
+	metaFileName := fmt.Sprintf("store/meta/%s.json", pkg)
 	metaFileLocation := filepath.Join(s.folder, metaFileName)
 
 	metaFile, err := os.Open(metaFileLocation)
@@ -89,7 +89,7 @@ func (s *FSStorage) RetrieveMetadata(pkg string, writer io.Writer) error {
 }
 
 func (s *FSStorage) StoreMetadata(pkg string, data io.Reader) error {
-	metaFileName := fmt.Sprintf("packages/meta/%s.json", pkg)
+	metaFileName := fmt.Sprintf("store/meta/%s.json", pkg)
 	metaFileLocation := filepath.Join(s.folder, metaFileName)
 
 	metaFile, err := os.Create(metaFileLocation)

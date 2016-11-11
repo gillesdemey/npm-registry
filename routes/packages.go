@@ -3,11 +3,10 @@ package routes
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
-	"strings"
 
+	"github.com/gillesdemey/npm-registry/packages"
 	"github.com/gillesdemey/npm-registry/storage"
 )
 
@@ -46,7 +45,7 @@ func GetPackageMetadata(w http.ResponseWriter, req *http.Request) {
 	}
 
 	go func() {
-		rewriteTarballLocation(resp.Body, pw)
+		packages.RewriteTarballLocation(resp.Body, pw)
 		pw.Close()
 	}()
 
@@ -102,19 +101,5 @@ func updateMetaStorage(s storage.Engine, pkg string, data io.Reader) error {
 		return err
 	}
 
-	return nil
-}
-
-func rewriteTarballLocation(meta io.Reader, writer io.Writer) error {
-	replacer := strings.NewReplacer(
-		"https://registry.npmjs.org",
-		"https://localhost:8080",
-	)
-	buff, err := ioutil.ReadAll(meta)
-	if err != nil {
-		return err
-	}
-
-	replacer.WriteString(writer, string(buff))
 	return nil
 }
