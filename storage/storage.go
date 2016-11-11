@@ -10,7 +10,7 @@ type Engine interface {
 	initialize() error
 	StoreTarball() error
 	RetrieveTarball() ([]byte, error)
-	StoreMetadata(pkg string) error
+	StoreMetadata(pkg string, data io.Reader) error
 	RetrieveMetadata(pkg string, writer io.Writer) error
 	RetrieveUser(token string) (model.User, error)
 	StoreUserToken(username string, token string) error
