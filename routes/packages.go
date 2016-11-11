@@ -40,15 +40,15 @@ func GetPackageMetadata(w http.ResponseWriter, req *http.Request) {
 	}
 	defer resp.Body.Close()
 
-	go func() {
-		rewriteTarballLocation(resp.Body, pw)
-		pw.Close()
-	}()
-
 	w.WriteHeader(resp.StatusCode)
 	if resp.StatusCode == http.StatusNotModified {
 		return
 	}
+
+	go func() {
+		rewriteTarballLocation(resp.Body, pw)
+		pw.Close()
+	}()
 
 	// tee duplicates the pipe reader and writes to the ResponseWriter
 	tee := io.TeeReader(pr, w)
