@@ -3,8 +3,10 @@ package routes
 import (
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/gillesdemey/npm-registry/storage"
 )
@@ -23,6 +25,8 @@ func GetPackageMetadata(w http.ResponseWriter, req *http.Request) {
 	storage := StorageFromContext(req.Context())
 	renderer := RendererFromContext(req.Context())
 
+	pr, pw := io.Pipe()
+
 	resp, err := tryUpstream(pkg)
 	if err != nil {
 		err = tryMetaStorage(storage, pkg, w)
@@ -36,12 +40,18 @@ func GetPackageMetadata(w http.ResponseWriter, req *http.Request) {
 	}
 	defer resp.Body.Close()
 
+	go func() {
+		rewriteTarballLocation(resp.Body, pw)
+		pw.Close()
+	}()
+
 	w.WriteHeader(resp.StatusCode)
 	if resp.StatusCode == http.StatusNotModified {
 		return
 	}
 
-	tee := io.TeeReader(resp.Body, w)
+	// tee duplicates the pipe reader and writes to the ResponseWriter
+	tee := io.TeeReader(pr, w)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -92,5 +102,19 @@ func updateMetaStorage(s storage.Engine, pkg string, data io.Reader) error {
 		return err
 	}
 
+	return nil
+}
+
+func rewriteTarballLocation(meta io.Reader, writer io.Writer) error {
+	replacer := strings.NewReplacer(
+		"https://registry.npmjs.org",
+		"https://localhost:8080",
+	)
+	buff, err := ioutil.ReadAll(meta)
+	if err != nil {
+		return err
+	}
+
+	replacer.WriteString(writer, string(buff))
 	return nil
 }
