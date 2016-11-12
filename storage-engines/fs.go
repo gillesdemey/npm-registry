@@ -37,6 +37,9 @@ func (s *FSStorage) StoreTarball(pkg string, filename string, reader io.Reader) 
 		log.WithFields(log.Fields{
 			"tarball": filename,
 		}).Info("Tarball already exists, skipping")
+		// for some reason teeReader doesn't function properly if we don't consume
+		// the reader, so send everything to /dev/null
+		io.Copy(ioutil.Discard, reader)
 		return nil
 	}
 
