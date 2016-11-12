@@ -2,9 +2,9 @@ package routes
 
 import (
 	"fmt"
+	log "github.com/Sirupsen/logrus"
 	"github.com/gillesdemey/npm-registry/storage"
 	"io"
-	"log"
 	"net/http"
 )
 
@@ -15,7 +15,6 @@ func GetTarball(w http.ResponseWriter, req *http.Request) {
 	pkg := req.URL.Query().Get(":pkg")
 	storage := StorageFromContext(req.Context())
 
-	log.Printf("Fetching tarball %s/%s...", pkg, filename)
 	resp, err := tryUpstreamTarball(pkg, filename)
 	if err != nil {
 		err := tryStorageTarball(storage, pkg, filename, w)
@@ -43,18 +42,23 @@ func GetTarball(w http.ResponseWriter, req *http.Request) {
 }
 
 func tryUpstreamTarball(pkg string, filename string) (*http.Response, error) {
-	log.Printf("Trying tarball upstream for %s/%s", pkg, filename)
+	logger := log.WithFields(log.Fields{
+		"package": pkg,
+		"tarball": filename,
+		"source":  "upstream",
+	})
+	logger.Info("Trying upstream...")
 
 	pkgMetaURL := fmt.Sprintf("https://registry.npmjs.org/%s/-/%s", pkg, filename)
 	response, err := http.Get(pkgMetaURL)
 	if err != nil {
-		log.Printf("Failed to try upstream: %s", err)
+		logger.Warn("Upstream failed: ", err)
 		return nil, err
 	}
 
 	if response.StatusCode == http.StatusNotFound {
 		err := fmt.Errorf("no such package available")
-		log.Printf("Failed to try upstream: %s", err)
+		logger.Warn("Upstream failed: ", err)
 		return nil, err
 	}
 
@@ -64,21 +68,32 @@ func tryUpstreamTarball(pkg string, filename string) (*http.Response, error) {
 }
 
 func tryStorageTarball(s storage.Engine, pkg string, filename string, writer io.Writer) error {
-	log.Printf("Trying storage tarball for %s/%s", pkg, filename)
+	logger := log.WithFields(log.Fields{
+		"package": pkg,
+		"tarball": filename,
+		"source":  "upstream",
+	})
+	logger.Info("Trying storage...")
+
 	err := s.RetrieveTarball(pkg, filename, writer)
 	if err != nil {
-		log.Printf("Failed to try tarball storage: %s", err)
+		logger.Warn("no such package available")
 		return err
 	}
 	return nil
 }
 
 func updateTarballStorage(s storage.Engine, pkg string, filename string, data io.Reader) error {
-	log.Printf("Updating %s/%s in tarball storage", pkg, filename)
+	logger := log.WithFields(log.Fields{
+		"package": pkg,
+		"tarball": filename,
+		"source":  "upstream",
+	})
+	logger.Info("Updating tarball storage")
 
 	err := s.StoreTarball(pkg, filename, data)
 	if err != nil {
-		log.Printf("Failed to update %s/%s in tarball storage: %s", pkg, filename, err)
+		logger.Error("Failed to update tarball storage: %s", err)
 		return err
 	}
 	return nil

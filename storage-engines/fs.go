@@ -3,9 +3,9 @@ package storageengines
 import (
 	"bytes"
 	"fmt"
+	log "github.com/Sirupsen/logrus"
 	"io"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 	"time"
@@ -34,8 +34,10 @@ func (s *FSStorage) StoreTarball(pkg string, filename string, reader io.Reader) 
 	tarballLocation := filepath.Join(tarballPath, filename)
 
 	if _, err := os.Stat(tarballLocation); err == nil {
-		log.Printf("Tarball %s already exists, aborting", tarballLocation)
-		return nil // file already exists
+		log.WithFields(log.Fields{
+			"tarball": filename,
+		}).Info("Tarball already exists, skipping")
+		return nil
 	}
 
 	// create subdirectories we need, ignore errors

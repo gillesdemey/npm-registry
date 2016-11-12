@@ -2,7 +2,7 @@ package routes
 
 import (
 	"encoding/json"
-	"log"
+	log "github.com/Sirupsen/logrus"
 	"net/http"
 	"regexp"
 
@@ -52,11 +52,14 @@ func Whoami(w http.ResponseWriter, req *http.Request) {
 	authHeader := req.Header.Get("Authorization")
 	token := re.ReplaceAllString(authHeader, "")
 
-	log.Printf("Whoami request for token '%s'", token)
+	log.Info("Whoami request")
 
 	username, err := storage.RetrieveUsernameFromToken(token)
 
 	if err != nil {
+		log.WithFields(log.Fields{
+			"token": token,
+		}).Info("Whoami request failed: ", err)
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}

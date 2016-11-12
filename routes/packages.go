@@ -2,8 +2,8 @@ package routes
 
 import (
 	"fmt"
+	log "github.com/Sirupsen/logrus"
 	"io"
-	"log"
 	"net/http"
 
 	"github.com/gillesdemey/npm-registry/packages"
@@ -60,18 +60,23 @@ func GetPackageMetadata(w http.ResponseWriter, req *http.Request) {
 }
 
 func tryUpstream(pkg string) (*http.Response, error) {
-	log.Printf("Trying upstream for %s\n", pkg)
+	logger := log.WithFields(log.Fields{
+		"source":  "upstream",
+		"package": pkg,
+	})
+
+	logger.Info("Trying upstream...")
 
 	pkgMetaURL := fmt.Sprintf("https://registry.npmjs.org/%s", pkg)
 	response, err := http.Get(pkgMetaURL)
 	if err != nil {
-		log.Printf("Failed to try upstream: %s", err)
+		logger.Warn("Upstream failed: ", err)
 		return nil, err
 	}
 
 	if response.StatusCode == http.StatusNotFound {
 		err := fmt.Errorf("no such package available")
-		log.Printf("Failed to try upstream: %s", err)
+		logger.Warn(err)
 		return nil, err
 	}
 
@@ -81,11 +86,14 @@ func tryUpstream(pkg string) (*http.Response, error) {
 }
 
 func tryMetaStorage(s storage.Engine, pkg string, writer io.Writer) error {
-	log.Printf("Trying storage for %s\n", pkg)
+	logger := log.WithFields(log.Fields{
+		"source":  "storage",
+		"package": pkg,
+	})
 
 	err := s.RetrieveMetadata(pkg, writer)
 	if err != nil {
-		log.Printf("Failed to try storage: %s", err)
+		logger.Warn("no such package available")
 		return err
 	}
 
@@ -93,11 +101,15 @@ func tryMetaStorage(s storage.Engine, pkg string, writer io.Writer) error {
 }
 
 func updateMetaStorage(s storage.Engine, pkg string, data io.Reader) error {
-	log.Printf("Updating %s in meta storage", pkg)
+	logger := log.WithFields(log.Fields{
+		"source":  "storage",
+		"package": pkg,
+	})
+	logger.Info("Updating meta storage")
 
 	err := s.StoreMetadata(pkg, data)
 	if err != nil {
-		log.Printf("Failed to update %s in meta storage: %s", pkg, err)
+		logger.Error("Failed to update meta storage: ", err)
 		return err
 	}
 
