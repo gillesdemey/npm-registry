@@ -66,7 +66,9 @@ func (s *FSStorage) RetrieveTarball(pkg string, filename string, writer io.Write
 
 func (s *FSStorage) RetrieveUsernameFromToken(token string) (string, error) {
 	tokenEntries := make(map[string]model.Token)
-	if _, err := toml.DecodeFile("tokens.toml", &tokenEntries); err != nil {
+	tokenFile := filepath.Join(s.Folder, "tokens.toml")
+
+	if _, err := toml.DecodeFile(tokenFile, &tokenEntries); err != nil {
 		return "", err
 	}
 	tokenEntry := tokenEntries[token]
