@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"bytes"
 	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"github.com/gillesdemey/npm-registry/storage"
@@ -15,9 +16,12 @@ func GetTarball(w http.ResponseWriter, req *http.Request) {
 	pkg := req.URL.Query().Get(":pkg")
 	storage := StorageFromContext(req.Context())
 
+	buff := new(bytes.Buffer)
+	multiWriter := io.MultiWriter(w, buff)
+
 	resp, err := tryUpstreamTarball(pkg, filename)
 	if err != nil {
-		err := tryStorageTarball(storage, pkg, filename, w)
+		err := tryStorageTarball(storage, pkg, filename, multiWriter)
 		if err != nil {
 			w.WriteHeader(http.StatusNotFound)
 			return
@@ -31,9 +35,13 @@ func GetTarball(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// tee duplicates the body and writes to the ResponseWriter
-	tee := io.TeeReader(resp.Body, w)
-	updateTarballStorage(storage, pkg, filename, tee)
+	_, err = io.Copy(multiWriter, resp.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	updateTarballStorage(storage, pkg, filename, buff)
 }
 
 func tryUpstreamTarball(pkg string, filename string) (*http.Response, error) {

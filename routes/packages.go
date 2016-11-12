@@ -25,10 +25,11 @@ func GetPackageMetadata(w http.ResponseWriter, req *http.Request) {
 	renderer := RendererFromContext(req.Context())
 
 	pr, pw := io.Pipe()
+	multiWriter := io.MultiWriter(w, pw)
 
 	resp, err := tryUpstream(pkg)
 	if err != nil {
-		err = tryMetaStorage(storage, pkg, w)
+		err = tryMetaStorage(storage, pkg, multiWriter)
 		if err != nil {
 			renderer.JSON(w, http.StatusNotFound, map[string]string{
 				"error": "no such package available",
@@ -45,13 +46,11 @@ func GetPackageMetadata(w http.ResponseWriter, req *http.Request) {
 	}
 
 	go func() {
-		packages.RewriteTarballLocation(resp.Body, pw)
+		packages.RewriteTarballLocation(resp.Body, multiWriter)
 		pw.Close()
 	}()
 
-	// tee duplicates the pipe reader and writes to the ResponseWriter
-	tee := io.TeeReader(pr, w)
-	updateMetaStorage(storage, pkg, tee)
+	updateMetaStorage(storage, pkg, pr)
 }
 
 func tryUpstream(pkg string) (*http.Response, error) {
