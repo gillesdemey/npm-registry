@@ -51,11 +51,6 @@ func GetPackageMetadata(w http.ResponseWriter, req *http.Request) {
 
 	// tee duplicates the pipe reader and writes to the ResponseWriter
 	tee := io.TeeReader(pr, w)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
 	updateMetaStorage(storage, pkg, tee)
 }
 

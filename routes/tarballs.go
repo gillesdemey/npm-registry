@@ -33,11 +33,6 @@ func GetTarball(w http.ResponseWriter, req *http.Request) {
 
 	// tee duplicates the body and writes to the ResponseWriter
 	tee := io.TeeReader(resp.Body, w)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
 	updateTarballStorage(storage, pkg, filename, tee)
 }
 
