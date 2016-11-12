@@ -10,7 +10,7 @@ import (
 
 func main() {
 	router := pat.New()
-	storage := storageengines.NewFSStorage("registry_data/")
+	storage := storageengines.NewFSStorage("store/")
 
 	server := server.New(router, storage)
 	http.ListenAndServe(":8080", server)
