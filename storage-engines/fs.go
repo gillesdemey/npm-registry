@@ -31,7 +31,17 @@ func (s *FSStorage) StoreTarball() error {
 	return nil
 }
 
-func (s *FSStorage) RetrieveTarball(string, io.Writer) error {
+func (s *FSStorage) RetrieveTarball(filename string, writer io.Writer) error {
+	metaFileName := fmt.Sprintf("store/tarballs/%s", filename)
+	metaFileLocation := filepath.Join(s.folder, metaFileName)
+
+	metaFile, err := os.Open(metaFileLocation)
+	if err != nil {
+		return err
+	}
+	defer metaFile.Close()
+
+	io.Copy(writer, metaFile)
 	return nil
 }
 
