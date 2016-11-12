@@ -5,8 +5,8 @@ import (
 )
 
 type TarballStoreRetriever interface {
-	StoreTarball() error
-	RetrieveTarball(pkg string, writer io.Writer) error
+	StoreTarball(pkg string, filename string, reader io.Reader) error
+	RetrieveTarball(pkg string, filename string, writer io.Writer) error
 }
 
 type MetaDataStoreRetriever interface {
