@@ -119,6 +119,7 @@ func updateMetaStorage(s storage.Engine, pkg string, data io.Reader) error {
 
 // TODO add authentication middleware
 func PublishPackage(w http.ResponseWriter, req *http.Request) {
+	var err error
 	storage := StorageFromContext(req.Context())
 	renderer := RendererFromContext(req.Context())
 
@@ -144,7 +145,7 @@ func PublishPackage(w http.ResponseWriter, req *http.Request) {
 		tag = k
 		break
 	}
-	version := distTags[tag]
+	version := distTags[tag].Data().(string)
 
 	logger := log.WithFields(log.Fields{
 		"package": pkgName,
@@ -158,8 +159,11 @@ func PublishPackage(w http.ResponseWriter, req *http.Request) {
 		fmt.Sprintf("%s-%s.tgz", pkgName, version),
 		ioutil.Discard, // write to /dev/null
 	)
+
 	if err == nil {
-		renderer.JSON(w, http.StatusBadRequest, map[string]string{"error": "version already exists"})
+		renderer.JSON(w, http.StatusBadRequest, map[string]string{
+			"error": "version already exists",
+		})
 		return
 	}
 
