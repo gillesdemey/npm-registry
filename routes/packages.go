@@ -1,10 +1,15 @@
 package routes
 
 import (
+	"bytes"
+	"encoding/base64"
 	"fmt"
+	"github.com/Jeffail/gabs"
 	log "github.com/Sirupsen/logrus"
 	"io"
+	"io/ioutil"
 	"net/http"
+	"strings"
 
 	"github.com/gillesdemey/npm-registry/packages"
 	"github.com/gillesdemey/npm-registry/storage"
@@ -85,6 +90,8 @@ func tryMetaStorage(s storage.Engine, pkg string, writer io.Writer) error {
 		"package": pkg,
 	})
 
+	logger.Info("Trying storage...")
+
 	err := s.RetrieveMetadata(pkg, writer)
 	if err != nil {
 		logger.Warn("no such package available")
@@ -108,4 +115,71 @@ func updateMetaStorage(s storage.Engine, pkg string, data io.Reader) error {
 	}
 
 	return nil
+}
+
+// TODO add authentication middleware
+func PublishPackage(w http.ResponseWriter, req *http.Request) {
+	storage := StorageFromContext(req.Context())
+	renderer := RendererFromContext(req.Context())
+
+	pkgInfo, err := gabs.ParseJSONBuffer(req.Body)
+	if err != nil {
+		renderer.JSON(w, http.StatusBadRequest, map[string]string{"error": "bad request"})
+		return
+	}
+	defer req.Body.Close()
+
+	pkgName, _ := pkgInfo.Path("name").Data().(string)
+
+	// Check if we have 1 dist-tag
+	distTags, _ := pkgInfo.Path("dist-tags").ChildrenMap()
+	if len(distTags) != 1 {
+		renderer.JSON(w, http.StatusBadRequest, map[string]string{"error": "must have 1 dist-tag"})
+		return
+	}
+
+	// Check if version of this package already exists
+	var tag string
+	for k, _ := range distTags {
+		tag = k
+		break
+	}
+	version := distTags[tag]
+
+	logger := log.WithFields(log.Fields{
+		"package": pkgName,
+		"version": version,
+	})
+	logger.Info("Processing package")
+
+	err = storage.RetrieveTarball(
+		pkgName,
+		// TODO there's probably a better way then manually creating the filename?
+		fmt.Sprintf("%s-%s.tgz", pkgName, version),
+		ioutil.Discard, // write to /dev/null
+	)
+	if err == nil {
+		renderer.JSON(w, http.StatusBadRequest, map[string]string{"error": "version already exists"})
+		return
+	}
+
+	attachments, _ := pkgInfo.Path("_attachments").ChildrenMap()
+	for filename, attachment := range attachments {
+		logger.WithFields(log.Fields{"attachment": filename}).Info("Decoding...")
+		data := attachment.Path("data").Data().(string)
+		buff, err := base64.StdEncoding.DecodeString(data)
+		if err != nil {
+			logger.Error(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		storage.StoreTarball(pkgName, filename, bytes.NewReader(buff))
+	}
+
+	// TODO save package metadata
+	// 1. check if package metadata already exists
+	// 2. add dist-tag version to existing versions
+	// 3. delete _attachments from JSON payload
+	pkgInfo.Delete("_attachments")
+	storage.StoreMetadata(pkgName, strings.NewReader(pkgInfo.String()))
 }
