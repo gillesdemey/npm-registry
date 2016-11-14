@@ -29,12 +29,9 @@ func GetPackageMetadata(w http.ResponseWriter, req *http.Request) {
 	storage := StorageFromContext(req.Context())
 	renderer := RendererFromContext(req.Context())
 
-	pr, pw := io.Pipe()
-	multiWriter := io.MultiWriter(w, pw)
-
 	resp, err := tryUpstream(pkg)
 	if err != nil {
-		err = tryMetaStorage(storage, pkg, multiWriter)
+		err = tryMetaStorage(storage, pkg, w)
 		if err != nil {
 			renderer.JSON(w, http.StatusNotFound, map[string]string{
 				"error": "no such package available",
@@ -43,6 +40,9 @@ func GetPackageMetadata(w http.ResponseWriter, req *http.Request) {
 		}
 		return
 	}
+	pr, pw := io.Pipe()
+	multiWriter := io.MultiWriter(w, pw)
+
 	defer resp.Body.Close()
 
 	w.WriteHeader(resp.StatusCode)
