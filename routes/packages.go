@@ -7,7 +7,6 @@ import (
 	"github.com/Jeffail/gabs"
 	log "github.com/Sirupsen/logrus"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"strings"
 
@@ -145,26 +144,39 @@ func PublishPackage(w http.ResponseWriter, req *http.Request) {
 		tag = k
 		break
 	}
-	version := distTags[tag].Data().(string)
+	newVersion := distTags[tag].Data().(string)
+	newVersions, _ := pkgInfo.Path("versions").ChildrenMap()
 
 	logger := log.WithFields(log.Fields{
 		"package": pkgName,
-		"version": version,
+		"version": newVersion,
 	})
 	logger.Info("Processing package")
 
-	err = storage.RetrieveTarball(
-		pkgName,
-		// TODO there's probably a better way then manually creating the filename?
-		fmt.Sprintf("%s-%s.tgz", pkgName, version),
-		ioutil.Discard, // write to /dev/null
-	)
+	// 1. grab existing versions if package already exists
+	metaFile := new(bytes.Buffer)
+	err = storage.RetrieveMetadata(pkgName, metaFile)
+	if err == nil { // package is already known
+		parsedMeta, err := gabs.ParseJSONBuffer(metaFile)
+		if err != nil {
+			logger.Error(err)
+			return
+		}
+		existingVersions, _ := parsedMeta.Path("versions").ChildrenMap()
 
-	if err == nil {
-		renderer.JSON(w, http.StatusBadRequest, map[string]string{
-			"error": "version already exists",
-		})
-		return
+		// 2. check if version already exists
+		if _, exists := existingVersions[newVersion]; exists {
+			renderer.JSON(w, http.StatusBadRequest, map[string]string{
+				"error": "version already exists",
+			})
+			return
+		}
+
+		// 3. add dist-tag version to existing versions
+		for v, obj := range existingVersions {
+			pkgInfo.Set(obj.Data(), "versions", v)
+		}
+		pkgInfo.Set(newVersions[newVersion].Data(), "versions", newVersion)
 	}
 
 	attachments, _ := pkgInfo.Path("_attachments").ChildrenMap()
@@ -180,10 +192,9 @@ func PublishPackage(w http.ResponseWriter, req *http.Request) {
 		storage.StoreTarball(pkgName, filename, bytes.NewReader(buff))
 	}
 
-	// TODO save package metadata
-	// 1. check if package metadata already exists
-	// 2. add dist-tag version to existing versions
 	// 3. delete _attachments from JSON payload
 	pkgInfo.Delete("_attachments")
+
+	// 4. store metadata blob
 	storage.StoreMetadata(pkgName, strings.NewReader(pkgInfo.String()))
 }
