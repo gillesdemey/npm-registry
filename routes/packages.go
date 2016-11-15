@@ -24,7 +24,13 @@ import (
 func GetPackageMetadata(w http.ResponseWriter, req *http.Request) {
 	var err error
 
+	scope := req.URL.Query().Get(":scope")
 	pkg := req.URL.Query().Get(":pkg")
+
+	if scope != "" && pkg != "" {
+		pkg = fmt.Sprintf("%s%%2F%s", scope, pkg)
+	}
+
 	storage := StorageFromContext(req.Context())
 	renderer := RendererFromContext(req.Context())
 

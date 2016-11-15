@@ -12,9 +12,15 @@ import (
 // GetTarball fetches a tarball from the upstream registry and falls back
 // to storage engine if it fails
 func GetTarball(w http.ResponseWriter, req *http.Request) {
-	filename := req.URL.Query().Get(":filename")
-	pkg := req.URL.Query().Get(":pkg")
 	storage := StorageFromContext(req.Context())
+
+	filename := req.URL.Query().Get(":filename")
+	scope := req.URL.Query().Get(":scope")
+	pkg := req.URL.Query().Get(":pkg")
+
+	if scope != "" && pkg != "" {
+		pkg = fmt.Sprintf("%s/%s", scope, pkg)
+	}
 
 	buff := new(bytes.Buffer)
 	multiWriter := io.MultiWriter(w, buff)
