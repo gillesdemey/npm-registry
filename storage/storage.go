@@ -1,8 +1,6 @@
 package storage
 
-import (
-	"io"
-)
+import "io"
 
 type TarballStoreRetriever interface {
 	StoreTarball(pkg string, filename string, reader io.Reader) error
