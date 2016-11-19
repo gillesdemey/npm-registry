@@ -12,6 +12,10 @@ func Root(w http.ResponseWriter, req *http.Request) {
 	render.Text(w, http.StatusOK, "Running npm registry")
 }
 
+func Noop(w http.ResponseWriter, req *http.Request) {
+	w.WriteHeader(http.StatusNoContent)
+}
+
 func StorageFromContext(c context.Context) storage.Engine {
 	return c.Value("storage").(storage.Engine)
 }

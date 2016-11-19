@@ -23,6 +23,9 @@ func New(router *pat.Router, storage storage.Engine) *negroni.Negroni {
 		next(w, req.WithContext(ctx))
 	}))
 
+	// favicon requests
+	router.Get("/favicon.ico", routes.Noop)
+
 	router.Get("/-/ping", routes.Ping)
 
 	// TODO: logout
