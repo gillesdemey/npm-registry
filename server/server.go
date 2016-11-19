@@ -34,13 +34,6 @@ func New(router *pat.Router, storage storage.Engine) *negroni.Negroni {
 	// Print the username config to standard output.
 	router.Get("/-/whoami", routes.Whoami)
 
-	// dist-tags
-	router.Get("/-/package/{name}/dist-tags", routes.DistTags)
-
-	router.Put("/-/package/{name}/dist-tags/:tag", func(w http.ResponseWriter, r *http.Request) {})
-
-	router.Delete("/-/package/{name}/dist-tags/:tag", func(w http.ResponseWriter, r *http.Request) {})
-
 	// tarballs
 	router.Get("/{scope}/{pkg}/-/{filename}", routes.GetTarball)
 	router.Get("/{pkg}/-/{filename}", routes.GetTarball)
