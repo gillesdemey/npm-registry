@@ -1,5 +1,8 @@
-build: test
+build: deps test
 	go build -o npm-registry server.go
+
+deps:
+	go get -t ./...
 
 run:
 	bra run
@@ -7,4 +10,4 @@ run:
 test:
 	go test ./...
 
-.PHONY: run build test
+.PHONY: run build test deps
