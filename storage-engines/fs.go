@@ -2,7 +2,6 @@ package storageengines
 
 import (
 	"bytes"
-	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"io"
 	"io/ioutil"
@@ -12,6 +11,7 @@ import (
 
 	"github.com/BurntSushi/toml"
 	"github.com/gillesdemey/npm-registry/model"
+	"github.com/gillesdemey/npm-registry/packages"
 )
 
 type FSStorage struct {
@@ -29,8 +29,14 @@ func (s *FSStorage) initialize() {
 	return
 }
 
-func (s *FSStorage) StoreTarball(pkg string, filename string, reader io.Reader) error {
-	tarballPath := filepath.Join(s.Folder, "tarballs", pkg)
+func (s *FSStorage) StoreTarball(filename string, reader io.Reader) error {
+	scope, filename := packages.SplitPackageName(filename)
+	tarballPath := filepath.Join(s.Folder, "tarballs")
+
+	if scope != "" {
+		tarballPath = filepath.Join(tarballPath, scope)
+	}
+
 	tarballLocation := filepath.Join(tarballPath, filename)
 
 	if _, err := os.Stat(tarballLocation); err == nil {
@@ -39,6 +45,8 @@ func (s *FSStorage) StoreTarball(pkg string, filename string, reader io.Reader) 
 		}).Info("Tarball already exists, skipping")
 		return nil
 	}
+
+	log.WithFields(log.Fields{"path": tarballLocation}).Info("Storing tarball")
 
 	// create subdirectories we need, ignore errors
 	os.MkdirAll(tarballPath, os.ModePerm)
@@ -54,7 +62,14 @@ func (s *FSStorage) StoreTarball(pkg string, filename string, reader io.Reader) 
 }
 
 func (s *FSStorage) RetrieveTarball(pkg string, filename string, writer io.Writer) error {
-	tarballLocation := filepath.Join(s.Folder, "tarballs", pkg, filename)
+	scope, _ := packages.SplitPackageName(pkg)
+	tarballPath := filepath.Join(s.Folder, "tarballs")
+
+	if scope != "" {
+		tarballPath = filepath.Join(tarballPath, scope)
+	}
+
+	tarballLocation := filepath.Join(tarballPath, filename)
 
 	tarball, err := os.Open(tarballLocation)
 	if err != nil {
@@ -108,8 +123,14 @@ func (s *FSStorage) StoreUserToken(token string, username string) error {
 }
 
 func (s *FSStorage) RetrieveMetadata(pkg string, writer io.Writer) error {
-	metaFileName := fmt.Sprintf("%s.json", pkg)
-	metaFileLocation := filepath.Join(s.Folder, "meta", metaFileName)
+	scope, pkgName := packages.SplitPackageName(pkg)
+	metaFilePath := filepath.Join(s.Folder, "meta")
+
+	if scope != "" {
+		metaFilePath = filepath.Join(metaFilePath, scope)
+	}
+
+	metaFileLocation := filepath.Join(metaFilePath, pkgName+".json")
 
 	metaFile, err := os.Open(metaFileLocation)
 	if err != nil {
@@ -122,8 +143,14 @@ func (s *FSStorage) RetrieveMetadata(pkg string, writer io.Writer) error {
 }
 
 func (s *FSStorage) StoreMetadata(pkg string, data io.Reader) error {
+	scope, pkgName := packages.SplitPackageName(pkg)
 	metaFilePath := filepath.Join(s.Folder, "meta")
-	metaFileLocation := filepath.Join(metaFilePath, pkg+".json")
+
+	if scope != "" {
+		metaFilePath = filepath.Join(metaFilePath, scope)
+	}
+
+	metaFileLocation := filepath.Join(metaFilePath, pkgName+".json")
 
 	// create subdirectories we need, ignore errors
 	os.MkdirAll(metaFilePath, os.ModePerm)

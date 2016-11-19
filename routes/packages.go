@@ -28,13 +28,13 @@ func GetPackageMetadata(w http.ResponseWriter, req *http.Request) {
 	pkg := req.URL.Query().Get(":pkg")
 
 	if scope != "" && pkg != "" {
-		pkg = fmt.Sprintf("%s%%2F%s", scope, pkg)
+		pkg = scope + "/" + pkg
 	}
 
 	storage := StorageFromContext(req.Context())
 	renderer := RendererFromContext(req.Context())
 
-	resp, err := tryUpstream(pkg)
+	resp, err := tryUpstream(queryEscape(pkg))
 	if err != nil {
 		err = tryMetaStorage(storage, pkg, w)
 		if err != nil {
@@ -153,6 +153,8 @@ func PublishPackage(w http.ResponseWriter, req *http.Request) {
 	newVersion := distTags[tag].Data().(string)
 	newVersions, _ := pkgInfo.Path("versions").ChildrenMap()
 
+	newVersions = packages.RewriteScopedTarballs(pkgName, newVersions)
+
 	logger := log.WithFields(log.Fields{
 		"package": pkgName,
 		"version": newVersion,
@@ -195,7 +197,7 @@ func PublishPackage(w http.ResponseWriter, req *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		storage.StoreTarball(pkgName, filename, bytes.NewReader(buff))
+		storage.StoreTarball(filename, bytes.NewReader(buff))
 	}
 
 	// 3. delete _attachments from JSON payload
@@ -203,4 +205,9 @@ func PublishPackage(w http.ResponseWriter, req *http.Request) {
 
 	// 4. store metadata blob
 	storage.StoreMetadata(pkgName, strings.NewReader(pkgInfo.String()))
+}
+
+// queryEscape turns slash into %2F for lookups in the public NPM registry
+func queryEscape(pkg string) string {
+	return strings.Replace(pkg, "/", "%2F", 1)
 }

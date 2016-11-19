@@ -3,7 +3,7 @@ package storage
 import "io"
 
 type TarballStoreRetriever interface {
-	StoreTarball(pkg string, filename string, reader io.Reader) error
+	StoreTarball(filename string, reader io.Reader) error
 	RetrieveTarball(pkg string, filename string, writer io.Writer) error
 }
 

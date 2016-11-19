@@ -47,6 +47,7 @@ func New(router *pat.Router, storage storage.Engine) *negroni.Negroni {
 	router.Get("/{pkg}", routes.GetPackageMetadata)
 
 	// publish
+	router.Put("/{scope}/{pkg}", routes.PublishPackage)
 	router.Put("/{pkg}", routes.PublishPackage)
 
 	// root

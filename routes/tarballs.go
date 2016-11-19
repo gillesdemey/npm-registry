@@ -19,7 +19,7 @@ func GetTarball(w http.ResponseWriter, req *http.Request) {
 	pkg := req.URL.Query().Get(":pkg")
 
 	if scope != "" && pkg != "" {
-		pkg = fmt.Sprintf("%s/%s", scope, pkg)
+		pkg = scope + "/" + pkg
 	}
 
 	buff := new(bytes.Buffer)
@@ -47,7 +47,10 @@ func GetTarball(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	updateTarballStorage(storage, pkg, filename, buff)
+	if scope != "" && filename != "" {
+		filename = scope + "/" + filename
+	}
+	updateTarballStorage(storage, filename, buff)
 }
 
 func tryUpstreamTarball(pkg string, filename string) (*http.Response, error) {
@@ -92,15 +95,14 @@ func tryStorageTarball(s storage.Engine, pkg string, filename string, writer io.
 	return nil
 }
 
-func updateTarballStorage(s storage.Engine, pkg string, filename string, data io.Reader) error {
+func updateTarballStorage(s storage.Engine, filename string, data io.Reader) error {
 	logger := log.WithFields(log.Fields{
-		"package": pkg,
 		"tarball": filename,
 		"source":  "upstream",
 	})
 	logger.Info("Updating tarball storage")
 
-	err := s.StoreTarball(pkg, filename, data)
+	err := s.StoreTarball(filename, data)
 	if err != nil {
 		logger.Error("Failed to update tarball storage: %s", err)
 		return err
