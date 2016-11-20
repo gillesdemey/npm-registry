@@ -1,6 +1,6 @@
 [run]
 init_cmds = [
-	["make"],
+	["make", "build"],
 	["./npm-registry"]
 ]
 
@@ -22,7 +22,7 @@ interrupt_timout = 15
 graceful_kill = false
 
 cmds = [
-	["make"],
+	["make", "build"],
 	["./npm-registry"]
 ]
 
