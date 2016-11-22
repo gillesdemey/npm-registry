@@ -21,7 +21,7 @@ import (
 // 3. if 404 or error -> check storage package
 // 4. if still not found -> 404
 // 5. if all is well, update storage with newer metadata
-func GetPackageMetadata(w http.ResponseWriter, req *http.Request) {
+func GetPackageMetadata(w http.ResponseWriter, req *http.Request, next http.HandlerFunc) {
 	var err error
 
 	scope := req.URL.Query().Get(":scope")
@@ -123,7 +123,7 @@ func updateMetaStorage(s storage.Engine, pkg string, data io.Reader) error {
 }
 
 // TODO add authentication middleware
-func PublishPackage(w http.ResponseWriter, req *http.Request) {
+func PublishPackage(w http.ResponseWriter, req *http.Request, next http.HandlerFunc) {
 	var err error
 	storage := StorageFromContext(req.Context())
 	renderer := RendererFromContext(req.Context())

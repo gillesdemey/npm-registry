@@ -11,7 +11,7 @@ import (
 
 // GetTarball fetches a tarball from the upstream registry and falls back
 // to storage engine if it fails
-func GetTarball(w http.ResponseWriter, req *http.Request) {
+func GetTarball(w http.ResponseWriter, req *http.Request, next http.HandlerFunc) {
 	storage := StorageFromContext(req.Context())
 
 	filename := req.URL.Query().Get(":filename")

@@ -32,22 +32,34 @@ func New(router *pat.Router, storage storage.Engine) *negroni.Negroni {
 	router.Put("/-/user/{user}", routes.Login)
 
 	// Print the username config to standard output.
-	router.Get("/-/whoami", negroni.New(
-		negroni.HandlerFunc(routes.ValidateToken),
-		negroni.HandlerFunc(routes.Whoami),
-	).ServeHTTP)
+	router.Get("/-/whoami", routes.CreateMiddleware(
+		routes.ValidateToken,
+		routes.Whoami,
+	))
 
 	// tarballs
-	router.Get("/{scope}/{pkg}/-/{filename}", routes.GetTarball)
-	router.Get("/{pkg}/-/{filename}", routes.GetTarball)
+	tarballHandlerFunc := routes.CreateMiddleware(
+		routes.ValidateToken,
+		routes.GetTarball,
+	)
+	router.Get("/{scope}/{pkg}/-/{filename}", tarballHandlerFunc)
+	router.Get("/{pkg}/-/{filename}", tarballHandlerFunc)
 
 	// packages
-	router.Get("/{scope}/{pkg}", routes.GetPackageMetadata) // scoped package
-	router.Get("/{pkg}", routes.GetPackageMetadata)
+	pkgMetaHandlerFunc := routes.CreateMiddleware(
+		routes.ValidateToken,
+		routes.GetPackageMetadata,
+	)
+	router.Get("/{scope}/{pkg}", pkgMetaHandlerFunc) // scoped package
+	router.Get("/{pkg}", pkgMetaHandlerFunc)
 
 	// publish
-	router.Put("/{scope}/{pkg}", routes.PublishPackage)
-	router.Put("/{pkg}", routes.PublishPackage)
+	publishPackageHandlerFunc := routes.CreateMiddleware(
+		routes.ValidateToken,
+		routes.PublishPackage,
+	)
+	router.Put("/{scope}/{pkg}", publishPackageHandlerFunc)
+	router.Put("/{pkg}", publishPackageHandlerFunc)
 
 	// root
 	router.Get("/", routes.Root)
