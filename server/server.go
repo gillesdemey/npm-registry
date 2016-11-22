@@ -32,7 +32,10 @@ func New(router *pat.Router, storage storage.Engine) *negroni.Negroni {
 	router.Put("/-/user/{user}", routes.Login)
 
 	// Print the username config to standard output.
-	router.Get("/-/whoami", routes.Whoami)
+	router.Get("/-/whoami", negroni.New(
+		negroni.HandlerFunc(routes.ValidateToken),
+		negroni.HandlerFunc(routes.Whoami),
+	).ServeHTTP)
 
 	// tarballs
 	router.Get("/{scope}/{pkg}/-/{filename}", routes.GetTarball)

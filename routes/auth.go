@@ -2,9 +2,7 @@ package routes
 
 import (
 	"encoding/json"
-	log "github.com/Sirupsen/logrus"
 	"net/http"
-	"regexp"
 
 	"github.com/gillesdemey/npm-registry/auth"
 	"github.com/gillesdemey/npm-registry/model"
@@ -44,25 +42,10 @@ func Login(w http.ResponseWriter, req *http.Request) {
 }
 
 // Return the username associated with the NPM token
-func Whoami(w http.ResponseWriter, req *http.Request) {
+func Whoami(w http.ResponseWriter, req *http.Request, next http.HandlerFunc) {
 	render := RendererFromContext(req.Context())
-	storage := StorageFromContext(req.Context())
 
-	re := regexp.MustCompile("(?i)Bearer ")
-	authHeader := req.Header.Get("Authorization")
-	token := re.ReplaceAllString(authHeader, "")
-
-	log.Info("Whoami request")
-
-	username, err := storage.RetrieveUsernameFromToken(token)
-
-	if err != nil {
-		log.WithFields(log.Fields{
-			"token": token,
-		}).Info("Whoami request failed: ", err)
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
+	username := req.Context().Value("user").(string)
 
 	render.JSON(w, http.StatusOK, map[string]string{"username": username})
 }
