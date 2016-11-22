@@ -16,12 +16,12 @@ func New(router *pat.Router, storage storage.Engine) *negroni.Negroni {
 	render := render.New()
 
 	// Attach storage and renderer on every request
-	n.Use(negroni.HandlerFunc(func(w http.ResponseWriter, req *http.Request, next http.HandlerFunc) {
+	n.UseFunc(func(w http.ResponseWriter, req *http.Request, next http.HandlerFunc) {
 		var ctx = req.Context()
 		ctx = context.WithValue(ctx, "storage", storage)
 		ctx = context.WithValue(ctx, "renderer", render)
 		next(w, req.WithContext(ctx))
-	}))
+	})
 
 	// favicon requests
 	router.Get("/favicon.ico", routes.Noop)
