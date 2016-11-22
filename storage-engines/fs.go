@@ -2,6 +2,7 @@ package storageengines
 
 import (
 	"bytes"
+	"errors"
 	log "github.com/Sirupsen/logrus"
 	"io"
 	"io/ioutil"
@@ -89,6 +90,9 @@ func (s *FSStorage) RetrieveUsernameFromToken(token string) (string, error) {
 		return "", err
 	}
 	tokenEntry := tokenEntries[token]
+	if tokenEntry.Username == "" {
+		return "", errors.New("no user found for token")
+	}
 
 	return tokenEntry.Username, nil
 }
