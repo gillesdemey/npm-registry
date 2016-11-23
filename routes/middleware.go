@@ -4,12 +4,13 @@ import (
   "golang.org/x/net/context"
   "net/http"
   "regexp"
+	"github.com/gillesdemey/npm-registry/storage"
 
   log "github.com/Sirupsen/logrus"
 )
 
 func ValidateToken(w http.ResponseWriter, req *http.Request, next http.HandlerFunc) {
-  storage := StorageFromContext(req.Context())
+	storage := req.Context().Value("storage").(storage.TokenRetriever)
 
   re := regexp.MustCompile("(?i)Bearer ")
 	authHeader := req.Header.Get("Authorization")

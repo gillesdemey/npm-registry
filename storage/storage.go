@@ -18,9 +18,13 @@ type UserStoreRetriever interface {
 	RetrieveUser(token string, writer io.Writer) error
 }
 
+type TokenRetriever interface {
+	RetrieveUsernameFromToken(token string) (string, error)
+}
+
 type Engine interface {
 	TarballStoreRetriever
 	MetaDataStoreRetriever
 	UserStoreRetriever
-	RetrieveUsernameFromToken(token string) (string, error) // Do we realy need this?
+	TokenRetriever
 }
