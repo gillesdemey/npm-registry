@@ -1,9 +1,9 @@
 package packages
 
 import (
+	"github.com/Jeffail/gabs"
 	"io"
 	"io/ioutil"
-	"github.com/Jeffail/gabs"
 	"strings"
 )
 

@@ -2,8 +2,8 @@ package routes
 
 import (
 	"github.com/gillesdemey/npm-registry/storage"
-	"github.com/urfave/negroni"
 	"github.com/unrolled/render"
+	"github.com/urfave/negroni"
 	"golang.org/x/net/context"
 	"net/http"
 )
