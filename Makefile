@@ -9,7 +9,7 @@ deps:
 run:
 	bra run
 
-test:
-	go test ./...
+test: deps
+	/bin/sh test/test.sh
 
 .PHONY: run build test deps all

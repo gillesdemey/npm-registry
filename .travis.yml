@@ -4,11 +4,8 @@ go:
   - 1.7
   - master
 
-before_install:
-  - go get -t -v ./...
-
 script:
-  - bash test/test.sh
+  - make test
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
