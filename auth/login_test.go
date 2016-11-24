@@ -13,3 +13,12 @@ func TestLogin(t *testing.T) {
   assert.Nil(t, err)
   assert.NotNil(t, token)
 }
+
+func TestLoginInvalid(t *testing.T) {
+  htpasswdProvider := &HtpasswdProvider{
+    File:NewHtpasswdFile("../test/htpasswd.test"),
+  }
+  token, err := htpasswdProvider.Login("bar", "foo")
+  assert.Error(t, err)
+  assert.Equal(t, token, "")
+}
