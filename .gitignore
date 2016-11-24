@@ -2,3 +2,4 @@ npm-registry
 tokens.toml
 store/
 node_modules/
+coverage.txt
