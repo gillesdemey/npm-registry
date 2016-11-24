@@ -6,6 +6,7 @@ import (
 
 	"github.com/gillesdemey/npm-registry/auth"
 	"github.com/gillesdemey/npm-registry/model"
+	"github.com/gillesdemey/npm-registry/storage"
 )
 
 // Create or verify a user named <username>
@@ -14,7 +15,7 @@ func Login(w http.ResponseWriter, req *http.Request) {
 	var login model.Login
 
 	render := RendererFromContext(req.Context())
-	storage := StorageFromContext(req.Context())
+	auth := req.Context().Value("auth").(auth.AuthProvider)
 
 	decoder := json.NewDecoder(req.Body)
 	if err = decoder.Decode(&login); err != nil {
@@ -32,6 +33,7 @@ func Login(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	storage := req.Context().Value("storage").(storage.UserStoreRetriever)
 	err = storage.StoreUserToken(token, username)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

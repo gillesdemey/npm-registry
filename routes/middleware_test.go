@@ -3,7 +3,6 @@ package routes
 import (
 	"errors"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"golang.org/x/net/context"
 	"net/http"
 	"net/http/httptest"
@@ -56,13 +55,4 @@ func TestValidateTokenWithInvalidToken(t *testing.T) {
 	})
 
 	assert.Equal(t, rec.Code, http.StatusUnauthorized)
-}
-
-type MockStorage struct {
-	mock.Mock
-}
-
-func (s *MockStorage) RetrieveUsernameFromToken(token string) (string, error) {
-	args := s.Called(token)
-	return args.String(0), args.Error(1)
 }

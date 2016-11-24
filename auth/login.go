@@ -1,22 +1,21 @@
 package auth
 
 import (
-	"fmt"
+	"errors"
 	log "github.com/Sirupsen/logrus"
 
 	"github.com/satori/go.uuid"
 )
 
-func Login(username string, password string) (string, error) {
+func (p *HtpasswdProvider) Login(username string, password string) (string, error) {
 	logger := log.WithFields(log.Fields{
 		"username": username,
 	})
 
-	htpasswdFile := NewHtpasswdFile("store/htpasswd")
-	err := htpasswdFile.CompareUsernameAndPassword(username, password)
+	err := p.File.CompareUsernameAndPassword(username, password)
 	if err != nil {
 		logger.Info("Login attempt failed")
-		return "", fmt.Errorf("invalid credentials")
+		return "", errors.New("invalid credentials")
 	}
 
 	logger.Info("Login attempt successful")
