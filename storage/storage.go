@@ -13,7 +13,6 @@ type MetaDataStoreRetriever interface {
 }
 
 type UserStoreRetriever interface {
-	StoreUser(pkg string) error
 	StoreUserToken(token, username string) error
 	RetrieveUser(token string, writer io.Writer) error
 }
