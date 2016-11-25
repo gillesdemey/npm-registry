@@ -2,6 +2,7 @@ package storageengines
 
 import (
   "github.com/stretchr/testify/suite"
+  "io"
   "io/ioutil"
   "os"
   "path"
@@ -15,6 +16,16 @@ type FSStorageSuite struct {
 
 func (s *FSStorageSuite) SetupSuite() {
   os.RemoveAll(s.storage.Folder)
+  os.MkdirAll(s.storage.Folder, os.ModePerm)
+
+  file, _ := os.Open("../test/fixtures/tokens.toml")
+  defer file.Close()
+
+  dest, _ := os.Create("../test/store/tokens.toml")
+  defer dest.Close()
+
+  _, err := io.Copy(dest, file)
+  s.Nil(err)
 }
 
 func (s *FSStorageSuite) TestStoreTarballUnscoped() {
@@ -58,6 +69,31 @@ func (s *FSStorageSuite) TestRetrieveTarballScoped() {
 
   err := storage.RetrieveTarball("@request/qs", "qs-0.1.0.tgz", ioutil.Discard)
   s.Nil(err)
+}
+
+func (s *FSStorageSuite) TestRetrieveUsernameFromToken() {
+  storage := s.storage
+  username, err := storage.RetrieveUsernameFromToken("abc-123-def-456")
+  s.Nil(err)
+  s.Equal(username, "foo")
+}
+
+func (s *FSStorageSuite) TestRetrieveUsernameFromTokenUnknownUser() {
+  storage := s.storage
+  username, err := storage.RetrieveUsernameFromToken("nope")
+  s.NotNil(err)
+  s.Equal(username, "")
+}
+
+func (s *FSStorageSuite) TestStoreUserToken() {
+  storage := s.storage
+
+  err := storage.StoreUserToken("foo-123-bar-456", "bar")
+  s.Nil(err)
+
+  username, err := storage.RetrieveUsernameFromToken("foo-123-bar-456")
+  s.Nil(err)
+  s.Equal(username, "bar")
 }
 
 func (s *FSStorageSuite) TearDownSuite() {
