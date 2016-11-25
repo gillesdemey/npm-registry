@@ -2,7 +2,7 @@ package routes
 
 import (
 	"errors"
-	"github.com/gillesdemey/npm-registry/storage-engines"
+	"github.com/gillesdemey/npm-registry/mocks"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/net/context"
 	"net/http"
@@ -20,7 +20,7 @@ func TestValidateToken(t *testing.T) {
 	rec := httptest.NewRecorder()
 
 	ctx := req.Context()
-	storage := new(storageengines.MockedStorage)
+	storage := new(mocks.MockedStorage)
 
 	storage.On("RetrieveUsernameFromToken", "abc123").Return("foo", nil)
 
@@ -43,7 +43,7 @@ func TestValidateTokenWithInvalidToken(t *testing.T) {
 	rec := httptest.NewRecorder()
 
 	ctx := req.Context()
-	storage := new(storageengines.MockedStorage)
+	storage := new(mocks.MockedStorage)
 
 	storage.
 		On("RetrieveUsernameFromToken", "abc123").
