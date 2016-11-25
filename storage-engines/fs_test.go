@@ -96,6 +96,52 @@ func (s *FSStorageSuite) TestStoreUserToken() {
   s.Equal(username, "bar")
 }
 
+func (s *FSStorageSuite) TestStoreMetadataUnscoped() {
+  meta, _ := os.Open("../test/fixtures/meta/qs.json")
+  defer meta.Close()
+
+  err := s.storage.StoreMetadata("qs", meta)
+  s.Nil(err)
+
+  file, err := os.Open(path.Join(s.storage.Folder, "meta", "qs.json"))
+  defer file.Close()
+
+  s.Nil(err)
+  s.NotNil(file)
+}
+
+func (s *FSStorageSuite) TestStoreMetadataScoped() {
+  meta, _ := os.Open("../test/fixtures/meta/@request/qs.json")
+  defer meta.Close()
+
+  err := s.storage.StoreMetadata("@request/qs", meta)
+  s.Nil(err)
+
+  file, err := os.Open(path.Join(s.storage.Folder, "meta", "@request", "qs.json"))
+  defer file.Close()
+
+  s.Nil(err)
+  s.NotNil(file)
+}
+
+func (s *FSStorageSuite) TestRetrieveMetadataUnscoped() {
+  meta, _ := os.Open("../test/fixtures/meta/qs.json")
+  defer meta.Close()
+
+  s.storage.StoreMetadata("qs", meta)
+  err := s.storage.RetrieveMetadata("qs", ioutil.Discard)
+  s.Nil(err)
+}
+
+func (s *FSStorageSuite) TestRetrieveMetadataScoped() {
+  meta, _ := os.Open("../test/fixtures/meta/@request/qs.json")
+  defer meta.Close()
+
+  s.storage.StoreMetadata("@request/qs", meta)
+  err := s.storage.RetrieveMetadata("@request/qs", ioutil.Discard)
+  s.Nil(err)
+}
+
 func (s *FSStorageSuite) TearDownSuite() {
   os.RemoveAll(s.storage.Folder)
 }
