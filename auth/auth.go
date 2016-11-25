@@ -1,15 +1,15 @@
 package auth
 
 type AuthProvider interface {
-  Login(user, pass string) (token string, err error)
+	Login(user, pass string) (token string, err error)
 }
 
 type HtpasswdProvider struct {
-  File *HtpasswdFile
+	File *HtpasswdFile
 }
 
 func NewHtpasswdProvider(file string) *HtpasswdProvider {
-  return &HtpasswdProvider{
-    File: NewHtpasswdFile(file),
-  }
+	return &HtpasswdProvider{
+		File: NewHtpasswdFile(file),
+	}
 }

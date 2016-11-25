@@ -16,7 +16,7 @@ import (
 )
 
 type MetaStorageSuite struct {
-  suite.Suite
+	suite.Suite
 	storage mocks.MockedStorage
 }
 
@@ -109,7 +109,7 @@ func (s *MetaStorageSuite) TearDownSuite() {
 }
 
 func TestMetaStorageSuite(t *testing.T) {
-  suite.Run(t, new(MetaStorageSuite))
+	suite.Run(t, new(MetaStorageSuite))
 }
 
 func TestQueryEscape(t *testing.T) {

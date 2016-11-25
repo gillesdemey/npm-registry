@@ -9,8 +9,8 @@ import (
 	"golang.org/x/net/context"
 	"net/http"
 	"net/http/httptest"
-	"testing"
 	"strings"
+	"testing"
 )
 
 func TestLogin(t *testing.T) {

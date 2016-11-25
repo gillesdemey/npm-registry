@@ -7,15 +7,15 @@ import (
 	"github.com/jarcoal/httpmock"
 	_ "github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
-	"strings"
-	"testing"
 	"io/ioutil"
 	"net/http"
 	_ "net/http/httptest"
+	"strings"
+	"testing"
 )
 
 type TarballStorageSuite struct {
-  suite.Suite
+	suite.Suite
 	storage mocks.MockedStorage
 }
 
@@ -111,5 +111,5 @@ func (s *TarballStorageSuite) TearDownSuite() {
 }
 
 func TestTarballStorageSuite(t *testing.T) {
-  suite.Run(t, new(TarballStorageSuite))
+	suite.Run(t, new(TarballStorageSuite))
 }
