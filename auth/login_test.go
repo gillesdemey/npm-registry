@@ -6,9 +6,7 @@ import (
 )
 
 func TestLogin(t *testing.T) {
-  htpasswdProvider := &HtpasswdProvider{
-    File:NewHtpasswdFile("../test/htpasswd.test"),
-  }
+  htpasswdProvider := NewHtpasswdProvider("../test/htpasswd.test")
   token, err := htpasswdProvider.Login("foo", "bar")
   assert.Nil(t, err)
   assert.NotNil(t, token)
