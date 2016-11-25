@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"io"
 	"github.com/stretchr/testify/mock"
 	"github.com/unrolled/render"
 	"golang.org/x/net/context"
@@ -23,9 +22,5 @@ func (s *MockStorage) RetrieveUsernameFromToken(token string) (string, error) {
 }
 
 func (s *MockStorage) StoreUserToken(token, username string) error {
-	return nil
-}
-
-func (s *MockStorage) RetrieveUser(token string, writer io.Writer) error {
 	return nil
 }

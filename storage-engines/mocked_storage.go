@@ -35,10 +35,6 @@ func (s *MockedStorage) StoreUserToken(token, username string) error {
 	args := s.Called(token, username)
 	return args.Error(0)
 }
-func (s *MockedStorage) RetrieveUser(token string, writer io.Writer) error {
-	args := s.Called(token, writer)
-	return args.Error(0)
-}
 
 func (s *MockedStorage) RetrieveUsernameFromToken(token string) (string, error) {
 	args := s.Called(token)

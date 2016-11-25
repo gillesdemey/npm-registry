@@ -14,7 +14,6 @@ type MetaDataStoreRetriever interface {
 
 type UserStoreRetriever interface {
 	StoreUserToken(token, username string) error
-	RetrieveUser(token string, writer io.Writer) error
 }
 
 type TokenRetriever interface {

@@ -97,10 +97,6 @@ func (s *FSStorage) RetrieveUsernameFromToken(token string) (string, error) {
 	return tokenEntry.Username, nil
 }
 
-func (s *FSStorage) RetrieveUser(string, io.Writer) error {
-	return nil
-}
-
 func (s *FSStorage) StoreUserToken(token string, username string) error {
 	tokenEntry := make(map[string]model.Token, 1)
 	tokenEntry[token] = model.Token{
