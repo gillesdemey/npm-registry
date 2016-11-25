@@ -1,6 +1,7 @@
 # NPM registry
 
 [![Build Status](https://travis-ci.org/gillesdemey/npm-registry.svg?branch=master)](https://travis-ci.org/gillesdemey/npm-registry)
+[![codecov](https://codecov.io/gh/gillesdemey/npm-registry/branch/master/graph/badge.svg)](https://codecov.io/gh/gillesdemey/npm-registry)
 
 A very simple NPM registry proxy and backup server designed to be easy, fast and stable.
 
