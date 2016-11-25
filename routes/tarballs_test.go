@@ -2,41 +2,89 @@ package routes
 
 import (
 	"errors"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
-	"net/http"
+	"github.com/gillesdemey/npm-registry/mocks"
+	"github.com/jarcoal/httpmock"
+	"github.com/stretchr/testify/suite"
+	"strings"
 	"testing"
+	"io/ioutil"
+	"net/http"
 )
 
-type MockedRoundTripper struct {
-	mock.Mock
+type TarballStorageSuite struct {
+  suite.Suite
+	storage mocks.MockedStorage
 }
 
-func (m *MockedRoundTripper) RoundTrip(req *http.Request) (resp *http.Response, err error) {
-	args := m.Called()
-	return args.Get(0).(*http.Response), args.Error(1)
+func (s *TarballStorageSuite) SetupSuite() {
+	httpmock.Activate()
+
+	httpmock.RegisterResponder(
+		"GET", "https://registry.npmjs.org/foo/-/foo-0.1.0.tgz",
+		httpmock.NewBytesResponder(http.StatusOK, []byte("")),
+	)
+
+	packageNotFoundResponder, _ := httpmock.NewJsonResponder(
+		http.StatusNotFound,
+		`{"error":"package could not be found."}`,
+	)
+	httpmock.RegisterResponder(
+		"GET", "https://registry.npmjs.org/foo/-/foo-0.0.0.tgz",
+		packageNotFoundResponder,
+	)
+
+	httpmock.RegisterResponder(
+		"GET", "https://registry.npmjs.org/fail/-/fail-0.1.0.tgz",
+		httpmock.ConnectionFailure,
+	)
 }
 
-func TestTryUpstreamTarballFound(t *testing.T) {
-	// Overwrites the Roundtripper of http's `DefaultClient` to the mocked
-	// `RoundTripper` so we can make assertions on it.
-	mockedTransport := new(MockedRoundTripper)
-	mockedTransport.On("RoundTrip").Return(
-		&http.Response{
-			Status:     "200 OK",
-			StatusCode: 200,
-		}, nil)
-	http.DefaultClient.Transport = mockedTransport
-
-	_, err := tryUpstreamTarball("hello", "world")
-	assert.Nil(t, err)
+func (s *TarballStorageSuite) TestTryUpstreamTarballFound() {
+	_, err := tryUpstreamTarball("foo", "foo-0.1.0.tgz")
+	s.Nil(err)
 }
 
-func TestTryUpstreamTarballNotFound(t *testing.T) {
-	mockedTransport := new(MockedRoundTripper)
-	mockedTransport.On("RoundTrip").Return(&http.Response{}, errors.New("Nope"))
-	http.DefaultClient.Transport = mockedTransport
+func (s *TarballStorageSuite) TestTryUpstreamTarballNotFound() {
+	_, err := tryUpstreamTarball("foo", "foo-0.0.0.tgz")
+	s.EqualError(err, "no such package available")
+}
 
-	_, err := tryUpstreamTarball("hello", "world")
-	assert.Error(t, err)
+func (s *TarballStorageSuite) TestTryUpstreamTarballConnectionFailure() {
+	_, err := tryUpstreamTarball("fail", "fail-0.1.0.tgz")
+	s.NotNil(err)
+}
+
+func (s *TarballStorageSuite) TestTryStorageTarball() {
+	storage := new(mocks.MockedStorage)
+	storage.On("RetrieveTarball", "foo", "foo-0.1.0.tgz", ioutil.Discard).
+		Return(nil)
+
+	err := tryStorageTarball(storage, "foo", "foo-0.1.0.tgz", ioutil.Discard)
+	s.Nil(err)
+}
+
+func (s *TarballStorageSuite) TestTryStorageTarballFailure() {
+	storage := new(mocks.MockedStorage)
+	storage.On("RetrieveTarball", "foo", "foo-0.1.0.tgz", ioutil.Discard).
+		Return(errors.New("something happend"))
+
+	err := tryStorageTarball(storage, "foo", "foo-0.1.0.tgz", ioutil.Discard)
+	s.NotNil(err)
+}
+
+func (s *TarballStorageSuite) TestUpdateTarballStorage() {
+	storage := new(mocks.MockedStorage)
+	storage.On("StoreTarball", "foo/foo-0.1.0.tgz", strings.NewReader("")).
+		Return(nil)
+
+	err := updateTarballStorage(storage, "foo/foo-0.1.0.tgz", strings.NewReader(""))
+	s.Nil(err)
+}
+
+func (s *TarballStorageSuite) TearDownSuite() {
+	httpmock.DeactivateAndReset()
+}
+
+func TestTarballStorageSuite(t *testing.T) {
+  suite.Run(t, new(TarballStorageSuite))
 }
