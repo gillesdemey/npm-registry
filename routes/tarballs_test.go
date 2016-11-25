@@ -69,7 +69,7 @@ func (s *TarballStorageSuite) TestTryStorageTarball() {
 func (s *TarballStorageSuite) TestTryStorageTarballFailure() {
 	storage := new(mocks.MockedStorage)
 	storage.On("RetrieveTarball", "foo", "foo-0.1.0.tgz", ioutil.Discard).
-		Return(errors.New("something happend"))
+		Return(errors.New("something happened"))
 
 	err := tryStorageTarball(storage, "foo", "foo-0.1.0.tgz", ioutil.Discard)
 	s.NotNil(err)
