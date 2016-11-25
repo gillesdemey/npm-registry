@@ -2,6 +2,7 @@ package routes
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"github.com/gillesdemey/npm-registry/storage"
@@ -69,7 +70,7 @@ func tryUpstreamTarball(pkg string, filename string) (*http.Response, error) {
 	}
 
 	if response.StatusCode == http.StatusNotFound {
-		err := fmt.Errorf("no such package available")
+		err := errors.New("no such package available")
 		logger.Warn("Upstream failed: ", err)
 		return nil, err
 	}
