@@ -22,7 +22,7 @@ func RewriteTarballLocation(meta io.Reader, writer io.Writer) error {
 }
 
 func RewriteScopedTarballs(pkgName string, versions map[string]*gabs.Container) map[string]*gabs.Container {
-	scope, pkgName := SplitPackageName(pkgName)
+	scope, _ := SplitPackageName(pkgName)
 	if scope == "" { // not a scope package
 		return versions
 	}
