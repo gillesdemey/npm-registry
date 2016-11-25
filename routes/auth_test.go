@@ -2,7 +2,9 @@ package routes
 
 import (
 	"github.com/gillesdemey/npm-registry/auth"
+	"github.com/gillesdemey/npm-registry/mocks"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"github.com/urfave/negroni"
 	"golang.org/x/net/context"
 	"net/http"
@@ -49,7 +51,8 @@ func serveTestRequest(rec *httptest.ResponseRecorder, req *http.Request) {
 	n.UseHandlerFunc(Login)
 
 	auth := auth.NewHtpasswdProvider("../test/htpasswd.test")
-	storage := new(MockStorage)
+	storage := new(mocks.MockedStorage)
+	storage.On("StoreUserToken", mock.AnythingOfType("string"), "foo").Return(nil)
 
 	ctx := NewRendererContext()
 	ctx = context.WithValue(ctx, "storage", storage)
