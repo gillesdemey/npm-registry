@@ -1,16 +1,16 @@
 package routes
 
 import (
-	_ "context"
+	"context"
 	"errors"
 	"github.com/gillesdemey/npm-registry/mocks"
 	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/assert"
-	_ "github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	"io/ioutil"
 	"net/http"
-	_ "net/http/httptest"
+	"net/http/httptest"
 	"strings"
 	"testing"
 )
@@ -85,24 +85,29 @@ func (s *MetaStorageSuite) TestUpdateMetaStorage() {
 	s.Nil(err)
 }
 
-// func (s *MetaStorageSuite) TestGetPackageMetadata() {
-// 	req, _ := http.NewRequest("GET", "/foo", nil)
-//
-// 	storage := new(mocks.MockedStorage)
-// 	storage.On("RetrieveMetadata", "foo", mock.Anything).
-// 		Return(nil)
-// 	storage.On("StoreMetadata", "foo", strings.NewReader("")).
-// 		Return(nil)
-//
-// 	rec := httptest.NewRecorder()
-//
-// 	ctx := NewRendererContext()
-// 	ctx = context.WithValue(ctx, "storage", storage)
-//
-// 	GetPackageMetadata(rec, req.WithContext(ctx), func(w http.ResponseWriter, req *http.Request) {
-// 		s.Equal(rec.Code, http.StatusOK)
-// 	})
-// }
+func (s *MetaStorageSuite) TestGetPackageMetadata() {
+	httpmock.RegisterNoResponder(httpmock.InitialTransport.RoundTrip)
+
+	req, _ := http.NewRequest("GET", "/foo", nil)
+	q := req.URL.Query()
+	q.Set(":pkg", "foo")
+	req.URL.RawQuery = q.Encode()
+
+	req.Header.Add("Authorization", "Bearer abc123")
+
+	rec := httptest.NewRecorder()
+
+	ctx := NewRendererContext()
+	storage := new(mocks.MockedStorage)
+
+	storage.On("StoreMetadata", "foo", mock.Anything).
+		Return(nil)
+
+	ctx = context.WithValue(ctx, "storage", storage)
+
+	GetPackageMetadata(rec, req.WithContext(ctx), func(w http.ResponseWriter, req *http.Request) {
+		s.Equal(rec.Code, http.StatusOK)
+	})}
 
 func (s *MetaStorageSuite) TearDownSuite() {
 	httpmock.DeactivateAndReset()
